@@ -6,8 +6,8 @@ def parse_tuple(string_form):
     tuple_form = string_form.replace(",", "")
     tuple_form = tuple_form.replace("(", "")
     tuple_form = tuple_form.replace(")", "")
-    tuple_form = map(int, tuple_form.split())
-    tuple_form = tuple(tuple_form)
+    print(tuple_form)
+    tuple_form = tuple(map(int, tuple_form.strip().split()))
     return tuple_form
 # Problem Description:
 
@@ -17,8 +17,31 @@ def parse_tuple(string_form):
 # is "Yes," as shown in Figure D.
 # The input format is the same as for Problem 1.
 
-def generate_variables(W, H, K, L, blockages):
-    variables = []
+
+def squares_of(v, W, H, i):
+    i, j, d = v
+    answer = []
+    if d == 'u':
+        answer = [(i, j), (i+1, j), (i, j + 1)]
+    if d == 'l':
+        answer = [(i,j),(i -1, j - 1),(i, j + 1)]
+    if d == 'r':
+        answer = [(i,j),(i-1,j-1),(i,j-1)]
+    if d == 'd':
+        answer = [(i,j),(i+1,j),(i,j - 1)]
+    return (i, [(s[0], s[1]) for s in answer if s[0] >= 0 and s[0] < H and s[1] >= 0 and s[1] < W])
+
+def generate_variables(W, H, K, L):
+    variables = {}
+    directions = ['u', 'l', 'r', 'd' ]
+    for x in range(1,W+1):
+        for y in range(1, H+1):
+            for dir in directions:
+                for i in range(L):
+                    placement = squares_of((x,y,dir), W, H, i)
+                    # Check if the placement does not go off the board
+                    if len(placement[1]) == 3:
+                        variables[(x,y,i)] = placement[1]
     return variables
 
 def generate_COVER_clause(variables, W, H, K, L, blockages):
@@ -40,11 +63,13 @@ def print_instance(COVER, ONCE, BLOCKAGE):
 
 if __name__ == "__main__":
     W, H, K, L = map(int, input().split())
-    blockages = [] # Initialize list of blockages (in the form of tuples) not allowed to be covered
+    blockages = []
     for i in range(K):
-        blockage = parse_tuple(input())
-        blockages.append(blockage)
-    # Creates a Variable for each L and Each Symmetry of L
+        blockages.append(parse_tuple(input()))
+    print(blockages)
+    print(W, H, K, L)
+
+    # Creates a Variable for each L and Each Rotation of L
     variables = generate_variables(W, H, K, L, blockages)
     # Every Square is Covered By an L
     COVER = generate_COVER_clause(variables, W, H, K, L, blockages)
