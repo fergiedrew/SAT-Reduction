@@ -1,7 +1,5 @@
 import itertools
 
-from numpy import full, var
-
 # Make a solver that reduces grid problem #1 from:
 # https://udallas.brightspace.com/d2l/le/content/47383/viewContent/504108/View
 
@@ -21,21 +19,36 @@ def parse_tuple(string_form):
 # is "Yes," as shown in Figure D.
 # The input format is the same as for Problem 1.
 
+def all_Ls(H, W, blockages):
+    directions = ['u', 'l', 'd', 'r']
+    count = 1
+    for y in range(H):
+        for x in range(W):
+            for dir in directions:
+            
+                if len(squares_of((x,y,dir), W, H, blockages)) == 3:
+                    variables[(x,y)] = count
+                    count += 1
 
-def squares_of(v, W, H):
+
+
+                    
+
+
+def squares_of(v, W, H, blockages):
     i, j, d = v
     answer = []
     if d == 'u':
-        answer = [(i, j), (i+1, j), (i, j+1)]
+        answer = [(i, j), (i-1, j), (i, j-1)]
     if d == 'l':
-        answer = [(i,j), (i-1, j), (i, j+1)]
+        answer = [(i,j), (i+1, j), (i, j-1)]
     if d == 'r':
-        answer = [(i,j),(i-1,j),(i,j-1)]
+        answer = [(i,j),(i+1,j),(i,j+1)]
     if d == 'd':
-        answer = [(i,j),(i ,j-1),(i+1,j)]
-    return [(s[0], s[1]) for s in answer if s[0] >= 1 and s[0] <= H and s[1] >= 1 and s[1] <= W]
+        answer = [(i,j),(i ,j-1),(i-1,j)]
+    return [(s[0], s[1]) for s in answer if s[0] >= 1 and s[0] <= W and s[1] >= 1 and s[1] <= H and (s[0], s[1]) not in blockages]
 
-def generate_variables(W, H, K, L):
+def generate_variables(W, H, K, L, blockages):
     variables = {}
     directions = ['u', 'l', 'r', 'd']
     count = 1
@@ -43,13 +56,14 @@ def generate_variables(W, H, K, L):
         for y in range(1, H+1):
             for dir in directions:
                 for i in range(1,L+1):
-                    placement = squares_of((x,y,dir), W, H)
+                    placement = squares_of((x,y,dir), W, H, blockages)
                     # Check if the placement does not go off the board
+                    print(f'{placement=} for {x} , {y}')
                     if len(placement) == 3:
                         for square in placement:
                             # Add all squares covered by placement to variables
                             variables[(square[0],square[1],i)] = count
-                            count += 1
+                    count += 1
     print(variables)
     return variables
 
@@ -77,6 +91,8 @@ def generate_ONCE_clause(variables, W, H, K, L, blockages):
     for y in range(1,H+1):
         for x in range(1,W+1):
             for l1, l2 in itertools.combinations(list(range(1,L+1)), 2):
+                if (x,y) in blockages:
+                    continue
                 ONCE.append([-variables[(x,y,l1)], -variables[(x,y,l2)]])
 
     return ONCE
@@ -99,6 +115,13 @@ def print_instance(COVER, ONCE, BLOCKAGE):
         print_clause(clause)
 
 if __name__ == "__main__":
+
+
+
+
+
+
+
     W, H, K, L = map(int, input().split())
     blockages = []
     for i in range(K):
@@ -106,8 +129,19 @@ if __name__ == "__main__":
     # print(blockages)
     # print(W, H, K, L)
 
+    L_to_s = {}
+    s_to_L = {}
+    for l in all_Ls(H, W, blockages):
+        L_to_s[l] = squares_of(l)
+        for s in L_to_s[l]:
+            if s not in s_to_L:
+                s_to_L[s] = [l]
+            else:
+                s_to_L[s].append(l)
+        
+
     # Creates a Variable for each L and Each Rotation of L
-    variables = generate_variables(W, H, K, L)
+    variables = generate_variables(W, H, K, L, blockages)
     # Every Square is Covered By an L
     COVER = generate_COVER_clause(variables, W, H, K, L, blockages)
     # Every Square is Covered Only Once
@@ -116,12 +150,12 @@ if __name__ == "__main__":
     BLOCKAGE = generate_BLOCKAGE_clause(variables, W, H, K, L, blockages)
 
     for clause in COVER:
-        print(clause)
+        print(clause, 0)
     
     for clause in ONCE:
-        print_clause(clause)
+        print(clause[0], clause[1], 0)
 
     for clause in BLOCKAGE:
-        print(clause)
+        print(clause, 0)
 
 
