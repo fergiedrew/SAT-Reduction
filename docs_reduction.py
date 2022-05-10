@@ -1,4 +1,4 @@
-from satispy import Variable, Cnf
+from satispy import Variable, Cnf 
 from satispy.solver import Minisat
 
 H = 8 # height of board
@@ -27,7 +27,7 @@ for i in range(H):
 # Build a variable for each tetromino
 varz = {}
 for t in all_tets:
-    s = str(t) # string
+    s = str(t) # string (never used)
     v = Variable(s) # variable
     varz[t] = v # tuple as key in varz dictionary
 
@@ -60,8 +60,19 @@ for i in range(H): # loop over the squares
         tets = s_to_tet[(i, j)]
         for t1 in range(len(tets)): # loop over the pairs of Ts covering this square
             for t2 in range(t1+1, len(tets)):
-                ONCE &= (-varz[tets[t1]] | - varz[tets[t2]]) # Not both Ts picked
-# Build the full clause
-exp = COVER & ONCE
-solver = Minisat()
-solution = solver.solve(exp)
+                ONCE &= (-varz[tets[t1]] | -varz[tets[t2]]) # Not both Ts picked
+
+if __name__ == "__main__":
+    # Build the full clause
+    exp = COVER & ONCE
+    solver = Minisat()
+    solution = solver.solve(exp)
+
+
+
+
+
+
+
+
+
