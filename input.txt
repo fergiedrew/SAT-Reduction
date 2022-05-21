@@ -1,0 +1,8 @@
+Input will be of the format
+
+The first line will contain W (Width), H (Height), and K (The amount of blockages on board), and L (The number of tetronimos)
+The next K lines will conain locations (x, y) of cells that cannot / are not required to be covered by a L tile.
+
+W H K L
+(a, b)
+(a, b)
