@@ -77,10 +77,8 @@ if __name__ == "__main__":
                 ONCE.append(" ".join(map(str, [l1,l2])))
 
     # Print Clauses
-    for clause in COVER:
-        print(clause, 0)
-    for clause in ONCE:
-        print(clause, 0)
+    for clause in COVER: print(clause, 0)
+    for clause in ONCE: print(clause, 0)
 
 
 
